@@ -59,7 +59,7 @@ The goes through some stages including:
 
 ## The game - Player perspective
 
-![Alt text](images/prancing_pony.png "The Prancing Pony" {width=140px})
+<img src="images/prancing_pony.png" width="250"/>
 
 
 The environment for the game is the first part of Frodo's travel with The Ring.
@@ -69,3 +69,4 @@ Finally they should continue their path to Rivendel.
 
 Each of the stages will present new challenges that need to be completed before advancing to next stage.
 
+<img src="images/gandalf.png" width="250"/>
