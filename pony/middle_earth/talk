@@ -1,0 +1,160 @@
+#!/bin/bash
+
+trap '' 2
+
+if [ ! -d ~/.pp ] 
+then
+    mkdir ~/.pp
+    echo "0" > ~/.pp/stage
+fi
+
+WHO=$1
+STAGE=`cat ~/.pp/stage`
+if [ "$STAGE" == "4" ]
+then
+  clear
+  echo "There's nothing else to talk either with Barliman or with Aragorn"
+  echo "Before leaving The Prancing Pony be sure you carry Gandalf's letter with you"
+  echo ""
+  echo "In case you're not sure how to do that, you can still type 'helpme' for instructions"
+  exit
+fi
+
+if [ "$WHO" == "" ]
+then
+    clear
+    echo "I don't really know who are you trying to talk with"
+    echo "Probably you need to be more specific"
+    echo ""
+    echo "Right now I only see two persons in the Prancing Pony"
+    echo "They are Barliman Butterbur and Strider"
+    echo ""
+    echo "You can talk with any of them by running:"
+    echo "    - talk strider"
+    echo "    - talk barliman"
+    exit
+fi
+
+shopt -s nocasematch
+
+if [[ "$WHO" == "barliman" ]]
+then
+    if [ "$STAGE" == "0" ]
+    then
+       clear
+       echo "- Hey there!"
+       echo "- I see you're Frodo Baggins. Gandalf knew you would be here sooner or later, and he left here this letter for you"
+       echo ""
+       echo ""
+       cat << 'LETTER' 
+“THE PRANCING PONY, BREE.
+
+Midyear's Day, Shire Year, 1418.
+
+Dear Frodo,
+Bad news has reached me here.
+I must go off at once. You had better leave Bag End soon, and get out of the Shire before the end of July at latest.
+I will return as soon as I can; and I will follow you, if I find that you are gone.
+Leave a message for me here, if you pass through Bree. You can trust the landlord (Butterbur).
+You may meet a friend of mine on the Road: a Man, lean, dark, tall, by some called Strider.
+He knows our business and will help you. Make for Rivendel. There I hope we may meet again.
+If I do not come, Elrond will advise you.
+Yours in haste
+GANDALF.
+PS. Do NOT use It again, not far any reason whatever! Do not travel by night! ”
+
+“PPS. Make sure that it is the real Strider. There are many strange men on the roads. His true name is Aragorn.”
+
+LETTER
+        echo "1" > ~/.pp/stage
+        exit
+    fi
+    if [ "$STAGE" == "1" ]
+    then
+        echo "- I have just given you Gandalf's letter. Probably you'd better follow his instructions"
+        echo "- Sure..."
+        echo "- Remember that as a help you can type 'letter' to see the letter content again"
+        echo ""
+        exit
+    fi
+    if [ "$STAGE" == "2" ]
+    then
+        echo "You come back to Barliman Butterbur to ask him how could you know if you're talking to the real Strider"
+        echo "- I am sorry, my friend. I think you may talk again with him and keep in mind Gandalf's warning"
+        echo "- Remember that as a help you can type 'letter' to see the letter content again"
+        echo ""
+        echo "3" > ~/.pp/stage
+        exit
+    fi
+    if [ "$STAGE" == "3" ]
+    then
+        echo "There's nothing else to talk with Barliman Butterbur"
+	echo ""
+	exit
+    fi
+fi
+
+if [[ "$WHO" == "strider" ]]
+then
+    clear
+    if [ "$STAGE" == "0" ]
+    then
+        echo "Hmmm... while you were about to talk with the man you suppose to be Strider, a sense of distrust invaded you"
+        echo ""
+        echo "You don't know this guy so probably it is a better idea to talk with Barliman Butterbur first"
+        echo ""
+        echo ""
+        exit
+    fi
+    if [ "$STAGE" == "1" ]
+    then
+        echo "'I am called Strider,' he said in a low voice."
+        echo "'I am very pleased to meet you. Let me start with a warning first... "
+        echo "... if I were you, I should stop your young friends from talking too much."
+        echo " Drink, fire, and chance-meeting are pleasant enough, but, well - this isn't the Shire."
+	echo "There are queer folk about. Though I say it as shouldn't, you may think,' he added with a wry smile, seeing Frodo's glance. " 
+	echo "And there have been even stranger travellers through Bree lately, he went on, watching Frodo's face."
+        echo "2" > ~/.pp/stage
+        exit
+    fi
+
+    if [ "$STAGE" == "2" ]
+    then
+        echo "You've just talked with Strider, but you still don't know who he is"
+	echo "Probably you need to talk again with Barliman Butterbur. You have to be sure you're talking to the right Strider"
+        echo "" 
+        exit
+    fi
+    if [ "$STAGE" == "3" ]
+    then
+	echo "You ask Sam to ask Strider"
+	echo "- You might be a play-acting spy, for all I can see, trying to get us to go with you."
+	echo "You might have done in the real Strider and took his clothes. What have you to say to that?"
+	echo ""
+	echo "- 'That you are a stout fellow,' answered Strider; 'but I am afraid my only answer to you, Sam Gamgee, is this."
+	echo "If I had killed the real Strider, I could kill you. And I should have killed you already without so much talk. "
+	echo "If I was after the Ring, I could have it - NOW!' He stood up, and seemed suddenly to grow taller. "
+	echo "In his eyes gleamed a light, keen and commanding. "
+	echo "Throwing back his cloak, he laid his hand on the hilt of a sword that had hung concealed by his side. They did not dare to move. "
+	echo "'But I am the real Strider, fortunately,' he said, looking down at them with his face softened by a sudden smile. "
+	echo "'I am Aragorn son of Arathorn; and if by life or death I can save you, I will.' " 
+	echo ""
+	echo "There was a long silence. At last Frodo spoke with hesitation. "
+	echo "'I believed that you were a friend before the letter came,' he said, 'or at least I wished to. "
+	echo "You have frightened me several times tonight, but never in the way that servants of the Enemy would, or so I imagine."
+	echo "- 'I see,' laughed Strider. 'I look foul and feel fair. Is that it? All that is gold does not glitter, not all those who wander are lost."
+	echo ""
+	echo "'Sam said nothing.'"
+	echo ""
+	echo "- Well,' said Strider, 'with Sam's permission we will call that settled. Strider shall be your guide. We shall have a rough road tomorrow. "
+	echo "Even if we are allowed to leave Bree unhindered, we can hardly hope now to leave it unnoticed. But I shall try to get lost as soon as possible. "
+	echo "I know one or two ways out of Bree-land other than the main road. If once we shake off the pursuit, I shall make for Weathertop.'"
+	echo "- 'Weathertop?' said Sam. 'What's that?'"
+	echo "- 'It is a hill, just to the north of the Road, about half way from here to Rivendel. It commands a wide view all round; "
+	echo "and there we shall have a chance to look about us. Gandalf will make for that point, if he follows us. "
+	echo "After Weathertop our journey will become more difficult, and we shall have to choose between various dangers."
+	echo ""
+        echo "4" > ~/.pp/stage
+        exit
+    fi
+fi

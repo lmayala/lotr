@@ -1,0 +1,24 @@
+#!/bin/bash
+
+FILE=$1
+shift 1
+for VAR in "$@"; do
+    export "$VAR"
+done
+
+if [ "$DELAY" == "" ]
+then
+    DELAY=0.1
+fi
+
+echo ""
+while IFS= read -r CMD; do
+    if [ "$EVAL" == "true" ]
+    then
+        eval "echo \"$CMD\""
+    else
+        echo $CMD
+    fi
+    sleep "$DELAY"
+done < "$FILE"
+

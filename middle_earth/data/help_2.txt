@@ -1,0 +1,13 @@
+Your mission  will be to find "The Prancing Pony" and start a talk with its owner, Barliman Butterbur.
+
+As you may expect, the inn is represented by a container you should find among the running ones.
+Remember that command 'docker ps' shows all the containers running in docker.
+After you find the container, you can try accessing its filesystem with the following command:
+
+docker exec -it <container id or name> /bin/bash 
+
+When inside the container, you will have to find Barliman Butterbur who will tell the next step for your mission.
+
+If needed, the command 'helpme' will also be available inside "The Prancing Pony"
+
+

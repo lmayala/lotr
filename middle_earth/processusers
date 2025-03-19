@@ -1,0 +1,89 @@
+#!/bin/bash
+
+while true
+do
+  sleep 1
+  getent group learning || addgroup learning
+  for USER in `ls /tmp/middle_earth`
+  do
+    LAST=`tail /etc/passwd -n 1`
+    IFS=':' 
+    ITEMS=($LAST)
+    LASTID=${ITEMS[2]}
+    IFS=$'\n'
+    NEWID=$(( $LASTID + 50 ))
+
+    echo "NOTICE - `date -R` - PR_USERS: User starting registration for user $USER with $NEWID" >> /var/log/middle_earth
+    echo "Adding ${USER} con ${NEWID}"
+    getent passwd $USER || /usr/sbin/adduser -D -s /bin/bash -G learning -u $NEWID $USER >> /var/log/middle_earth
+    RESULT=$?
+
+    /usr/bin/passwd -d $USER
+    chown -R $USER:learning /home/$USER
+    cp /etc/skel/.bashrc /home/$USER
+    chown $USER:learning /home/$USER/.bashrc
+    if [ $RESULT -eq 0 ] && [ "`getent passwd $USER`" != "" ]
+    then
+        echo "NOTICE - `date -R` - PR_USERS: Linux user $USER has been processed" >> /var/log/middle_earth
+        #NEWID=$(( $NEWID + 50 ))
+
+        #######################
+        ## Setup DB for user
+        #######################
+        
+        DBID=$(( $NEWID + 1000))
+        SAMPORT=$(( $DBID + 1))
+        PIPPORT=$(( $DBID + 2))
+        FRODOPORT=$(( $DBID + 3))
+        MERRYPORT=$(( $DBID + 4))
+        
+        RECORD=`mariadb -uroot -proot middle_earth -e "SELECT * FROM users WHERE user_id = $DBID"`
+        if [ "$RECORD" == "" ]
+        then
+                echo "Ingresando usuario ${USER} con ${DBID}"
+        	mariadb -uroot -proot middle_earth -e "INSERT INTO users (user_id) VALUES ($DBID)"
+		if [ $? -ne 0 ]
+		then
+                    echo "ERROR- `date -R` - PR_USERS: MariaDB user $USER was not inserted in DB" >> /var/log/middle_earth
+		fi
+        	mariadb -uroot -proot middle_earth -e "INSERT INTO stages VALUES ($DBID, 0);"
+        fi
+        
+        RECORDS=`mariadb -uroot -proot middle_earth -e "SELECT * FROM char_user WHERE user_id = $DBID"`
+        if [ "$RECORDS" == "" ]
+        then
+                echo "Ingresando chars"
+        	mariadb -uroot -proot middle_earth -e "INSERT INTO char_user (user_id, char_id, assigned_port) VALUES ($DBID, 1, $SAMPORT), ($DBID, 2, $PIPPORT), ($DBID, 3, $FRODOPORT), ($DBID, 4, $MERRYPORT)"
+        fi
+
+        #######################
+        ## Setup SSH for user
+        #######################
+        
+        mkdir -p /home/$USER/.ssh
+        echo "Host *" > /home/$USER/.ssh/config
+        echo "    StrictHostKeyChecking no" >> /home/$USER/.ssh/config
+        chown $USER /home/$USER/.ssh/config
+        chmod 400 /home/$USER/.ssh/config
+
+        ##############################
+        ## Sudo permissions for user
+        ##############################
+
+        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker rm ${USER}_*" > /etc/sudoers.d/${USER}
+        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker start ${USER}_*" >> /etc/sudoers.d/${USER}
+        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker stop ${USER}_*" >> /etc/sudoers.d/${USER}
+        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker ps" >> /etc/sudoers.d/${USER}
+        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker images" >> /etc/sudoers.d/${USER}
+        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker run *" >> /etc/sudoers.d/${USER}
+        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker build . -t ${USER}_*" >> /etc/sudoers.d/${USER}
+        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker exec *" >> /etc/sudoers.d/${USER}
+        
+        rm /tmp/middle_earth/$USER
+        docker restart prancing_pony
+    else
+        echo "ERROR - `date -R` - PR_USERS: While processing $USER with result= $RESULT" >> /var/log/middle_earth
+    fi
+  done
+done
+

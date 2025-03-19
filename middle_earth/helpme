@@ -1,0 +1,77 @@
+#!/bin/bash
+
+#trap '' 2
+
+function keypause () {
+
+        read -n 1 -r -s -p "Press any key to continue..." key
+}
+
+
+BOLD=$(tput bold)
+NORMAL=$(tput sgr0)
+
+SRC=/usr/local/bin/middle_earth
+DATA=$SRC/data
+USER=`whoami`
+DBID=$(( `id -u` + 1000))
+#STAGE_COMPLETED=`mariadb -uroot -proot middle_earth -r -B -sN -e "select stage_completed from stages WHERE user_id = $DBID;"|sed 's/\+\-*\+//g'|sed 's/[\|]*//g'|sed 's/\s*//g' |tr -d '\n'`
+STAGE_COMPLETED=`mariadb -uroot -proot middle_earth -r -B -sN -e "select stage_completed from stages WHERE user_id = $DBID;"`
+
+SAMPORT=$(( $DBID + 1))
+PIPPINPORT=$(( $DBID + 2))
+FRODOPORT=$(( $DBID + 3))
+MERRYPORT=$(( $DBID + 4))
+RIVENDEL_PORT=$(( $DBID + 20000))
+
+clear
+STAGE=$(( $STAGE_COMPLETED + 1 ))
+
+case $STAGE in
+
+	1) 
+		echo "${BOLD}From Hobbitton to Bree ${NORMAL}"
+		showlines $DATA/help_1.txt
+                echo ""
+		;;
+	2) 
+		echo "${BOLD}Into The Prancing Pony ${NORMAL}"
+		showlines $DATA/help_2.txt
+                echo ""
+		;;
+	3) 
+		echo "${BOLD}Outside The Prancing Pony ${NORMAL}"
+                showlines $DATA/help_3.txt
+                echo ""
+                ;;
+
+	4) 
+		echo "${BOLD}From Bree to Rivendel ${NORMAL}"
+		showlines $DATA/help_4.txt FRODOPORT=$FRODOPORT MERRYPORT=$MERRYPORT PIPPINPORT=$PIPPINPORT SAMPORT=$SAMPORT USER=$USER START_BOLD=$START_BOLD END_BOLD=$END_BOLD EVAL=true
+                echo ""
+                ;;
+
+	5) 
+		echo "${BOLD}Frodo is hurt${NORMAL}"
+		showlines $DATA/help_5.txt RIVENDEL_PORT=$RIVENDEL_PORT EVAL=true
+                echo ""
+                ;;
+	6) 
+		
+		showlines $DATA/sauron_eye.ansi EVAL=false DELAY=0.03
+		keypause
+		clear
+		echo "${BOLD}WELL DONE!! ${NORMAL}"
+		showlines $DATA/help_6.txt 
+		keypause
+		clear
+		showlines $DATA/ring.ansi EVAL=false DELAY=0.03
+                ;;
+	*)
+		clear
+		echo "Invalid stage ($STAGE). Check with the administrator"
+                echo ""
+                exit
+                ;;
+
+esac

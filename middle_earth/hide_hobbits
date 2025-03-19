@@ -1,0 +1,61 @@
+#!/bin/bash
+
+DBID=$(( `id -u` + 1000))
+SAMPORT=$(( $DBID + 1))
+PIPPORT=$(( $DBID + 2))
+FRODOPORT=$(( $DBID + 3))
+MERRYPORT=$(( $DBID + 4))
+DANGER=0
+
+STAGE_COMPLETED=`mariadb -uroot -proot middle_earth -sN -B -e "SELECT stage_completed FROM stages WHERE user_id = $DBID"`
+STAGE=$(( $STAGE_COMPLETED + 1 ))
+
+clear
+
+if [ "$STAGE" != "4" ] 
+then
+    echo "Where you are, your not be hiding from anyone"
+    echo "Please check the help by running 'helpme' before going on"
+    exit
+fi
+
+SAMWEB=`curl -s http://localhost:$SAMPORT`
+if [ "$SAMWEB" != "Sam is hidden" ]
+then
+   echo "Sam is in danger!! He is not hiding properly"
+   DANGER=1
+fi
+PIPWEB=`curl -s http://localhost:$PIPPORT`
+if [ "$PIPWEB" != "Pippin is hidden" ]
+then
+   echo "Pippin is in danger!! He is not hiding properly"
+   DANGER=1
+fi
+FRODOWEB=`curl -s http://localhost:$FRODOPORT`
+if [ "$FRODOWEB" != "Frodo is hidden" ]
+then
+   echo "Frodo is in danger!! He is not hiding properly"
+   DANGER=1
+fi
+MERRYWEB=`curl -s http://localhost:$MERRYPORT`
+if [ "$MERRYWEB" != "Merry is hidden" ]
+then
+   echo "Merry is in danger!! He is not hiding properly"
+   DANGER=1
+fi
+
+if [ $DANGER -eq 0 ]
+then
+    mariadb -uroot -proot middle_earth -sN -B -e "UPDATE stages SET stage_completed = 4 WHERE user_id = $DBID"
+    echo "Congratulations!!!"
+    echo ""
+    echo "You helped the fellowship to hide from the black riders."
+    echo "Now, the path to Rivendel should be easier."
+    echo ""
+    echo "Should it...?"
+    read -n 1 -r -s -p "Press any key to continue..." key
+    echo ""
+    welcome
+    #helpme
+fi
+

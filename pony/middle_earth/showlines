@@ -1,0 +1,16 @@
+#!/bin/bash
+
+
+FILE=$1
+if [ "$2" != "" ] 
+then
+    DELAY=$2
+else
+    DELAY=0.1
+fi
+
+echo ""
+while read CMD; do
+    echo "$CMD"
+sleep $DELAY
+done < "$FILE"

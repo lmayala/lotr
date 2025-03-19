@@ -1,0 +1,63 @@
+Black Riders are represented by containers hidden behind specific ports. 
+
+As in the the story, there are 9 riders pursuing the Hobbits
+Before trying to escape from them, you will need to identify where they are.
+
+Each of the containers is listening on a specific port, so you will need to identify those ports.
+You can use the real name for the riders that is 'Nazgúl' for guessing which of the containers running corresponds to a Nazgúl
+
+=== TIPS ===
+
+Docker commands and tips you may need for this step:
+
+- 'docker ps' for showing all the containers running in Docker
+- remember that whenever a container listens on a specific port you can map that port to the same or to another port in the machine where the container runs
+  This is seen as <port1>-><port2> when you run 'docker ps' where 'port1' is the host port reachable from the outside and port2 is the container port.
+  In our environment, all Nazgûls containers run on port 5678, but each of them is mapped into a port 600x. 
+  For reaching the content of each container you should use a web URL of the form http://localhost:600x
+
+
+=== WARNING ===
+
+Due to the way docker is installed, all commands must be preceeded by 'sudo'
+So, whenever this help says 'docker ps' you should execute 'sudo docker ps'
+
+
+=== WARNING2 ===
+
+When playing you're not allowed to run destructive docker commands (even with 'sudo') on containers whose names do not start with your username
+If you username is 'test', you'll be able to run 'sudo docker rm test_mycontainer' but not 'sudo docker rm otheruser_containers'
+
+It would be a good practice to add your username before any image or container you create so you'll be able to manage it
+
+
+=== GOAL ===
+
+All Nazgûls' containers could be reached through http and they will respond with the name of the Nazgûl there.
+For getting the name through console you have two alternatives:
+  - Using curl: 'curl http://localhost:<mapped_port>'
+  - Using a text web browser called 'Lynx': 'lynx http://localhost:<mapped_port>'
+
+Once you get the ports you will have to create a list with the nine ports and Nazgûl names in a text file where each port:name should be in a single line.
+Final format for the file should be:
+
+port1:name_for_nazgûl_1
+port2:name_for_nazgûl_2
+...
+
+
+IMPORTANT: The name provided in the file should not be the container name, but the one shown by the web client (whichever you decided to use).
+
+TIP: There are some text editors installed you can use for creating the file:
+
+   - vim  - the traditional Linux editor. Powerful but a bit tricky if you're not used to it
+   - nano - limited but easier to use
+   * jed  - Similar to Windows's 'edit' is the recommended one. It has a menu you can trigger with F10 so it would be even easier that Nano.
+
+=== HOW TO FINISH THE STAGE ===
+
+After you finish creating the file, you can call the command 'find_riders' followed by your file name.
+Eg. If your file is called 'nazgul.txt' you should run 'find_riders nazgul.txt'
+You will receive a message with the results and if you were able to identify where the Nazgúls are, also the instructions to your next step.
+
+Whenever you need to go back to this instructions, command 'helpme' will show this same text.

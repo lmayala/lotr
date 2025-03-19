@@ -1,0 +1,26 @@
+#!/bin/bash
+
+SRC=/usr/local/bin/middle_earth
+DATA=$SRC/data
+
+###########################
+## Nazgûl containers
+###########################
+
+nazguls_array=('The Witch-king'  'Khamûl' 'Dark Marshal' 'Betrayer' 'Undying' 'Dwimmerleik' 'Knight of Umbar' 'Tainted' 'Shadow Lord')
+
+for i in "${!nazguls_array[@]}"; do
+    docker start nazgul$i >> /dev/null
+    if [ $? -eq 1 ]
+    then
+        docker run --name nazgul$i -d --restart always -p 600$i:5678 nazgul -text="${nazguls_array[i]}" 
+    fi
+done
+
+###########################
+## Prancing pony container
+###########################
+
+cd /pony
+docker build . -t prancing_pony
+docker run -d -v /home:/home -v /etc/shadow:/etc/shadow -v /etc/passwd:/etc/passwd -v /etc/group:/etc/group -h the-prancing-pony --name prancing_pony prancing_pony

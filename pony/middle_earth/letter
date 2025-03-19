@@ -1,0 +1,3 @@
+#!/bin/bash
+
+showlines /opt/gandalf_letter.txt

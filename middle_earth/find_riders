@@ -1,0 +1,94 @@
+#!/bin/bash
+
+SRC=/usr/local/bin/middle_earth
+DATA=$SRC/data
+
+if [ "$1" == "" ]
+then
+	echo "ERROR: You need to provide a filename with your results"
+	echo "USAGE: find_riders <filename>" 
+	exit
+fi
+file=$1
+if [ ! -e $file ] 
+then
+	echo "ERROR: File does not exist"
+	exit
+fi
+
+DBID=$(( `id -u` + 1000))
+STAGE=`mariadb -uroot -proot middle_earth -sN -B -e "SELECT stage_completed FROM stages WHERE user_id = $DBID"`
+if [ "$STAGE" != 0 ]
+then
+	echo "-------------------------------------------------------------------------"
+	echo "It seems there was some big error or you're a bit lost."
+	echo "As per my records, you already identified the Nazgúls."
+	echo "If you're in doubts you can always run 'helpme' to see next instructions"
+	echo ""
+	echo "If still in doubt contact administrator with following error code: STG${STAGE}F"
+	echo "-------------------------------------------------------------------------"
+	exit
+fi
+
+n=(0 0 0 0 0 0 0 0 0)
+while read -r line; do
+    IFS=':'
+    half=0
+    myline=""
+    for x in $line 
+    do 
+        if [ $half -eq 0 ]
+        then
+            myline=$x:
+        else
+            md5hash=$(echo -n $x | md5sum | head -c 32)
+            myline=$myline$md5hash
+        fi
+        half=$(( $half ^ 1 ))
+    done
+
+    case $myline in
+	    "6000:03565e0eb181ce4cad9ff1a5d51ee9e4") 
+		    n[0]=1;;
+	    "6001:27ed4acd5dd13a3dbc5969bb18fd3be9") 
+		    n[1]=1;;
+	    "6002:095bd968c51f72ca7bbd14f7f73b2c3b") 
+		    n[2]=1;;
+	    "6003:bf768e7e63f0e3775d0589eb04472043") 
+		    n[3]=1;;
+	    "6004:5d81ccb4266c1ebd5a8fedcb41b967fd") 
+		    n[4]=1;;
+	    "6005:502e20eb9cec4578def17d0b0e530812") 
+		    n[5]=1;;
+	    "6006:9198e86e8539b4aca6f55960483f56c5") 
+		    n[6]=1;;
+	    "6007:ca1d36b689ff205441f6a2ca78a86fb5") 
+		    n[7]=1;;
+	    "6008:8594c409e5753698bd8b9b106985a9db") 
+		    n[8]=1;;
+
+	    esac
+done <$file 
+
+for i in ${n[@]}
+do
+	if [ $i -eq 0 ]
+	then
+		echo "Some of the riders where not properly identified ($i)"
+		exit
+	fi
+done
+echo ""
+echo ""
+echo "-----------------------------"
+echo "Well done!"
+echo "All riders were identified"
+echo "-----------------------------"
+echo ""
+echo ""
+STAGE=`mariadb -uroot -proot middle_earth -e "UPDATE stages SET stage_completed = 1 WHERE user_id = $DBID"`
+read -n 1 -r -s -p "Press any key to continue..." key
+echo ""
+clear
+showlines DATA/story_2.txt
+welcome

@@ -1,0 +1,62 @@
+#!/bin/bash
+
+LETTER="$HOME/gandalf_letter.txt"
+DBID=$(( `id -u` + 1000))
+ORIG_LETTER=/opt/gandalf_letter
+STAGE_COMPLETED=`mariadb -uroot -proot middle_earth -sN -B -e "SELECT stage_completed FROM stages WHERE user_id = $DBID"`
+STAGE=$(( $STAGE_COMPLETED + 1 ))
+
+if [ "$STAGE" != "3" ] 
+then
+    echo "I am not sure I understand what you're trying to do."
+    echo "This command has no sense in the stage you are"
+    if [ "$STAGE" == "2" ] 
+    then
+        echo ""
+        echo "It looks you need to find your way to The Prancing Pony"
+    fi
+    if [ "$STAGE" == "4" ] 
+    then
+        echo ""
+        echo "You already validated Gandalf's letter, so go for next stage or type 'helpme' if needed"
+    fi
+    exit
+fi
+
+if [ "$1" != "" ]
+then
+    LETTER=$1
+fi
+
+clear
+
+if [ -f $LETTER ]
+then
+    CMP=$(cmp -s $ORIG_LETTER $LETTER)
+    echo $CMP
+    if [ "$CMP" != 0 ]
+
+    then    
+        mariadb -uroot -proot middle_earth -sN -B -e "UPDATE stages SET stage_completed = 3 WHERE user_id = $DBID"
+        echo "Great Job!"
+	echo "You were able to take Gandalf's letter out of the Prancing Pony"
+        echo ""
+        echo "Now is time to face new challenges!"
+        echo "You should start moving to Rivendel with the guidance of Aragorn"
+        echo "Remember you can always run the command 'helpme' to know how to proceed in you current mission"
+        echo ""
+	read -n 1 -r -s -p "Press any key to continue..." key
+        #helpme
+        welcome
+    else
+        echo "I've found a letter, but it doesn't seem to be the original one"
+        echo "Enter back The Prancing Pony container and copy it again"
+        echo ""
+    fi
+else
+    echo "I cannot find a file 'letter' in your home folder or in the path you provided"
+    echo "USAGE for the command is:"
+    echo "    - validate_letter -> for validating a file named 'letter' in your home folder"
+    echo "    - validate_letter <file> -> for validating a file by its name, including or not its path"
+    echo ""
+fi 

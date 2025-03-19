@@ -1,0 +1,14 @@
+trap '' INT
+clear
+IP=$(hostname -i)
+echo ""
+echo ""
+echo ""
+echo "****************************************************"
+echo "** Due to security reasons, this door is closed   **"
+echo "**                                                **"
+echo "**     You can still enter The Prancing Pony      **"
+echo "**   by running ssh <yourusername>@${IP}    **"
+echo "****************************************************"
+echo ""
+exit

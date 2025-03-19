@@ -1,0 +1,29 @@
+Frodo has been hurt and taken to Rivendel by the rest of the fellowship
+
+Your mission now is to build the environment for Elrond half-elven to cure him.
+
+As you may imagine we\'ll need to create another container, but this time the task is not just running an existing image.
+You will need to create a Dockerfile based on nginx image in Docker Hub.
+
+Basically, you just need to override index.html file inside the container.
+For that, create an index.html file with the content specified below and copy it over the default index.html inside the nginx image.
+
+
+=== Content required for index.html ===
+
+Healer: Elrond half-elven
+Healed: Frodo Baggins
+Place: Rivendel
+
+
+Your content should run at port $RIVENDEL_PORT
+
+=== TIPS ===
+
+Standard folder for nginx index file is /usr/share/nginx/html and there is where you need to copy your own index.html
+Your index.html does not need to have any html code, so it could be only plain text
+
+=== FINISHING THE STAGE ===
+
+For finishing the stage, run the command 'heal_frodo' that will validate the container exists and has the right data.
+You will receive a message with your results

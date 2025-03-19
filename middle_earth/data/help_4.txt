@@ -1,0 +1,56 @@
+We'll go one step further in this journey and now you'll have to create one container for each of the hobbits.
+Each of them should be able to 'hide' in a specific port reserved for him since the beginning of time.
+
+You have 2 main things to take into account:
+
+- You already have an image called 'hide_hobbit' for running your container and you only need to send the parameters for it
+- The parameters required are: 
+
+-p for mapping the port
+-d for running the container in detached mode
+--name for setting the name of the container
+
+
+== What you need to do ==
+
+The image hide_hobbit runs a website that listens on port 5678
+For hiding the hobbits you need to run a container for each of them redirecting the hobbit port into port 5678 in the container
+
+You should need to add an extra parameter for the website that specifies what to show in the website when accessed with a browser/curl.
+The extra parameter is -text and should be followed by the following texts according to the hobbit being hidden:
+
+Sam should hide at port $SAMPORT and text to be shown is "Sam is hidden"
+Pippin should hide at port $PIPPINPORT and text to be shown is "Pippin is hidden"
+Frodo should hide at port $FRODOPORT and text to be shown is "Frodo is hidden"
+Merry should hide at port $MERRYPORT and text to be shown is "Merry is hidden"
+
+$(tput bold)RECOMMENDATION:$(tput sgr0)
+
+You will only be able to remove containers that start with your username ($USER)
+In order to be able to remove any container in case of error, name each container after the following pattern:
+
+<your_username>_<hobbit_name>
+
+Eg.: $USER_frodo
+
+
+== TIPS ==
+
+'docker images' lists all the images locally available
+'docker run <image>' allow to create a container based on an image
+'docker rm <container_name_or_id>' removes a container
+'docker stop <container_name_or_id>' stops a container
+'docker start <container_name_or_id>' stops a container
+'docker help <command>' shows the help for any docker command
+
+
+$(tput bold)Order matters:$(tput sgr0)
+running 'docker run -p 80:5678 my_image' will create a container based on 'my_image' and will map port 80 in the host to port 5678 in the container
+running 'docker run my_image -p 80:5678' will not work (it will take '-p 80:5678' as a parameter for the image and not a as flag for mapping the ports)
+
+Exception:
+the parameter \"-text=<text>\" should stay at the end as it is not a docker parameter but a parameter for the website
+
+== FINISHING STAGE ==
+
+After you finish creating the containers, run the command 'hide_hobbits' to advance to next stage.

@@ -1,0 +1,72 @@
+trap '' INT
+
+export PATH=/usr/local/bin/middle_earth:$PATH
+cols=$(tput cols)
+if [ $cols -lt 150 ]
+then
+        echo "************************************************"
+        echo "     Your console resolution is too low."
+        echo "It needs at least 150 columns to work properly"
+        echo "************************************************"
+        exit 1
+fi
+
+is_valid_name() {
+    local name="$1"
+    [[ "$name" =~ ^[a-zA-Z][a-zA-Z0-9_-]*$ ]]
+}
+
+mkdir -p /tmp/middle_earth
+
+showlines /usr/local/bin/middle_earth/data/hobbiton.ansi
+read -n 1 -r -s -p "Press any key to continue..." key
+clear
+while true; do
+    echo ""
+    echo ""
+    echo "Welcome to Hobbiton. "
+    echo "For starting the game you should create a username"
+    echo -n "Please, enter a unique name here:"
+    read -r name
+
+    if ! is_valid_name "$name"; then
+        echo "Invalid name. It must start with a letter and only contain letters, numbers, '_' or '-'."
+        continue
+    fi
+
+    if getent passwd "$name" >/dev/null; then
+        echo "Name matches an existing system user. Try another."
+        continue
+    fi
+
+    if [[ -e "/tmp/middle_earth/$name" ]]; then
+        echo "Someone has already picked that name. Try another."
+        continue
+    fi
+
+    touch "/tmp/middle_earth/$name"
+    if [ $? -eq 0 ] 
+    then
+        IP=$(ip -4 -o addr show eth0 | awk '{print $4}' | cut -d'/' -f1)
+        clear
+        echo "************************************************************"
+        echo "**           Your user will be created shortly            **"
+        echo "**                                                        **"
+        echo "**            It could take some seconds for              **"
+        echo "**             configuring you environment                **"
+        echo "**                                                        **"
+        echo "** Once it is ready, you can start the game by running    **"
+        echo "**                                                        **"
+        echo "**   docker exec -it -u <your_username> lotr /bin/bash    **"
+        echo "**                                                        **"
+        echo "**                        or                              **"
+        echo "**                                                        **"
+        echo "**            ssh <your_username>@${IP}             **"
+        echo "**                                                        **"
+        echo "************************************************************"
+    fi
+    read -n 1 -r -s -p "Press any key to continue..." key
+    break
+done
+
+exit

@@ -1,0 +1,34 @@
+#!/bin/bash
+
+if [ ! -d ~/.pp ]
+then
+    mkdir ~/.pp
+    echo "0" > ~/.pp/stage
+    exit
+fi
+
+STAGE=`cat ~/.pp/stage`
+if [ "$STAGE" == "4" ]
+then
+  echo "You got all the information you need from The Prancing Pony."
+  echo "Your last task is to carry Gandalf's letter."
+  echo ""
+  echo "By default, the information in a container is kept there so we need to find a way to copy the letter outside of it"
+  echo "A copy of Gandalf's letter is in /opt folder but, as you can imagine, if you exit the container you won't be able to see it"
+  echo ""
+  echo "In our case, the container that runs The Prancing Pony has it's /home folder shared with the /home folder of the host"
+  echo "So anything you copy there, will also be seen when you exit the container."
+  echo ""
+  echo "For copying the letter you can use 'cp' command from Linux using /opt/<file_with_letter> as source"
+  echo "and '~' (that represents your home folder) as the target "
+  echo ""
+  echo "You can also use the command 'letter' to get the content of the letter and copy-paste it in a new file."
+  echo ""
+  echo "Once you get a file with the letter in your home folder, you'll be ready for next stage and you can exit the container"
+  echo ""
+  echo "Good luck!"
+else
+  echo "For talking with anyone in The Prancing Pony you have the command 'talk' available."
+  echo "Just type 'talk' followed by the name of the character to interact with them"
+  echo "Once you get all the information you need, you can exit the inn"
+fi

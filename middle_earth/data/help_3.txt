@@ -1,0 +1,4 @@
+You left The Prancing Pony after talking with Barliman Butterbur and finding Aragorn who will join the fellowship.
+
+If you followed correctly the instructions, you may also have a copy of Gandalf's letter in your home folder.
+For validating this stage and advance to the next one run the command 'validate_letter' 

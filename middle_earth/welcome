@@ -1,0 +1,47 @@
+#!/bin/bash
+trap '' 2
+SRC=/usr/local/bin/middle_earth
+DATA=$SRC/data
+DBID=$(( `id -u` + 1000))
+STAGE=`mariadb -uroot -proot middle_earth -sN -B -e "SELECT stage_completed + 1 FROM stages WHERE user_id = $DBID"`
+
+function keypause () {
+
+	read -n 1 -r -s -p "Press any key to continue..." key
+}
+
+if [ `tput cols` -lt 150 ]
+then
+	echo "************************************************"
+	echo "     Your console resolution is too low."
+	echo "It needs at least 150 columns to work properly"
+	echo "************************************************"
+	exit 1
+fi
+
+clear
+if [ "$STAGE" == "1" ] 
+then
+   showlines $DATA/gandalf.ansi DELAY=0.04
+   sleep 2
+   toilet -ktf small --gay < $DATA/quote1.txt
+   keypause
+   clear
+fi
+if [ -e $DATA/story_${STAGE}.txt ]
+then
+    showlines $DATA/story_${STAGE}.txt
+    keypause
+fi
+helpme
+keypause
+if [ "$STAGE" == "6" ]
+then
+    PROCESS=$(pgrep -u $USER sshd | head -1)
+    if [ "$PROCESS" != "" ]
+    then
+        kill -9 $(pgrep -u $USER sshd | head -1)
+    fi
+    kill -9 $PPID
+fi
+echo ""

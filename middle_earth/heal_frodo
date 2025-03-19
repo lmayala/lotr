@@ -1,0 +1,78 @@
+#!/bin/bash
+
+clear
+DBID=$(( `id -u` + 1000))
+RIVENDEL_PORT=$(( $DBID + 20000))
+STAGE=`mariadb -uroot -proot middle_earth -sN -B -e "SELECT stage_completed + 1 FROM stages WHERE user_id = $DBID"`
+
+if [ "$STAGE" -gt "5" ] 
+then
+    echo "You already finished your mission"
+    echo "There's nothing else you can do for now in Middle Earth"
+    exit
+fi
+if [ "$STAGE" -lt "5" ] 
+then
+    echo "Frodo has not been hurt"
+    echo "Please check the help by running 'helpme' before going on"
+    exit
+fi
+
+HEALEDK='Healed'
+HEALERK='Healer'
+PLACEK='Place'
+HEALERV='Elrond half-elven'
+HEALEDV='Frodo Baggins'
+PLACEV='Rivendel'
+HEALED=0
+HEALER=0
+PLACE=0
+
+CONTENT=`curl -s http://localhost:$RIVENDEL_PORT`
+OIFS=$IFS
+IFS=$'\n'
+ITEMS=$CONTENT
+
+for ITEM in ${ITEMS[@]}
+do
+    OIFS=$IFS
+    IFS=':'
+    KV=($ITEM)
+    K0=${KV[0]}
+    K1=${KV[1]}
+    TK0="${K0#"${K0%%[![:space:]]*}"}"
+    TK1="${K1#"${K1%%[![:space:]]*}"}"
+    if [ "$TK0" == "$PLACEK" -a "$TK1" == "$PLACEV" ] 
+    then
+        PLACE=1
+    fi
+    if [ "$TK0" == "$HEALERK" -a "$TK1" == "$HEALERV" ] 
+    then
+        HEALER=1
+    fi
+    if [ "$TK0" == "$HEALEDK" -a "$TK1" == "$HEALEDV" ] 
+    then
+        HEALED=1
+    fi
+    IFS=$OIFS
+done
+
+IFS=$OIFS
+
+if [ $HEALER -eq 1 -a $HEALED -eq 1 -a $PLACE -eq 1 ]
+then
+    mariadb -uroot -proot middle_earth -sN -B -e "UPDATE stages SET stage_completed = 5 WHERE user_id = $DBID"
+    echo "Great Job!"
+    echo ""
+    echo "By curing Frodo you finished your last mission"
+    read -n 1 -r -s -p "Press any key to continue..." key
+    helpme
+else
+    echo "Something is still wrong..."
+    echo ""
+    echo "Hurry up before Frodo gets worse"
+    echo ""
+    read -n 1 -r -s -p "Press any key to continue..." key
+    echo ""
+fi
+

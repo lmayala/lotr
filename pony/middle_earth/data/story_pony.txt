@@ -1,0 +1,14 @@
+Welcome to The Prancing Pony.
+
+Your group have just managed to escape from the Black Riders.
+Now it is time to get more information about Strider.
+
+There's a lonely guy sitting there and the owner of the inn.
+By Gandalf's instructions you suppose he could be Strider, but you still know nothing about him
+
+Your other option is talk with the owner.
+Choose with who you'll talk first...
+
+Remember you always have the command 'helpme' available if you run out of ideas
+
+-------------------------------------------------------------------------------------------------
