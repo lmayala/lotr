@@ -15,8 +15,7 @@ SRC=/usr/local/bin/middle_earth
 DATA=$SRC/data
 USER=`whoami`
 DBID=$(( `id -u` + 1000))
-#STAGE_COMPLETED=`mariadb -uroot -proot middle_earth -r -B -sN -e "select stage_completed from stages WHERE user_id = $DBID;"|sed 's/\+\-*\+//g'|sed 's/[\|]*//g'|sed 's/\s*//g' |tr -d '\n'`
-STAGE_COMPLETED=`mariadb -uroot -proot middle_earth -r -B -sN -e "select stage_completed from stages WHERE user_id = $DBID;"`
+STAGE_COMPLETED=`sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; SELECT stage_completed FROM stages WHERE user_id = $DBID;"`
 
 SAMPORT=$(( $DBID + 1))
 PIPPINPORT=$(( $DBID + 2))

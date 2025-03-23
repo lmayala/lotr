@@ -3,7 +3,6 @@
 while true
 do
   sleep 1
-  getent group learning || addgroup learning
   for USER in `ls /tmp/middle_earth`
   do
     LAST=`tail /etc/passwd -n 1`
@@ -37,23 +36,23 @@ do
         FRODOPORT=$(( $DBID + 3))
         MERRYPORT=$(( $DBID + 4))
         
-        RECORD=`mariadb -uroot -proot middle_earth -e "SELECT * FROM users WHERE user_id = $DBID"`
+        RECORD=`sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; SELECT * FROM users WHERE user_id = $DBID"`
         if [ "$RECORD" == "" ]
         then
                 echo "Ingresando usuario ${USER} con ${DBID}"
-        	mariadb -uroot -proot middle_earth -e "INSERT INTO users (user_id) VALUES ($DBID)"
+                sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; INSERT INTO users (user_id) VALUES ($DBID)"
 		if [ $? -ne 0 ]
 		then
                     echo "ERROR- `date -R` - PR_USERS: MariaDB user $USER was not inserted in DB" >> /var/log/middle_earth
 		fi
-        	mariadb -uroot -proot middle_earth -e "INSERT INTO stages VALUES ($DBID, 0);"
+                sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; INSERT INTO stages VALUES ($DBID, 0);"
         fi
         
-        RECORDS=`mariadb -uroot -proot middle_earth -e "SELECT * FROM char_user WHERE user_id = $DBID"`
+        RECORDS=`sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; SELECT * FROM char_user WHERE user_id = $DBID"`
         if [ "$RECORDS" == "" ]
         then
                 echo "Ingresando chars"
-        	mariadb -uroot -proot middle_earth -e "INSERT INTO char_user (user_id, char_id, assigned_port) VALUES ($DBID, 1, $SAMPORT), ($DBID, 2, $PIPPORT), ($DBID, 3, $FRODOPORT), ($DBID, 4, $MERRYPORT)"
+		sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; INSERT INTO char_user (user_id, char_id, assigned_port) VALUES ($DBID, 1, $SAMPORT), ($DBID, 2, $PIPPORT), ($DBID, 3, $FRODOPORT), ($DBID, 4, $MERRYPORT)"
         fi
 
         #######################
@@ -70,9 +69,12 @@ do
         ## Sudo permissions for user
         ##############################
 
-        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker rm ${USER}_*" > /etc/sudoers.d/${USER}
-        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker start ${USER}_*" >> /etc/sudoers.d/${USER}
-        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker stop ${USER}_*" >> /etc/sudoers.d/${USER}
+        #echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker rm ${USER}_*" > /etc/sudoers.d/${USER}
+        #echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker start ${USER}_*" >> /etc/sudoers.d/${USER}
+        #echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker stop ${USER}_*" >> /etc/sudoers.d/${USER}
+        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker rm *" > /etc/sudoers.d/${USER}
+        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker start *" >> /etc/sudoers.d/${USER}
+        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker stop *" >> /etc/sudoers.d/${USER}
         echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker ps" >> /etc/sudoers.d/${USER}
         echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker images" >> /etc/sudoers.d/${USER}
         echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker run *" >> /etc/sudoers.d/${USER}

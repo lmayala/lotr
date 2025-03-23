@@ -3,7 +3,7 @@
 function update_stage () {
   DBID=$(( `id -u` + 1000))
   DBIP=`ip route|grep default|awk '{print $3}'`
-  mariadb --ssl=OFF -uroot -proot -h $DBIP middle_earth -e "UPDATE stages SET stage_completed = 2 WHERE user_id = $DBID"
+  sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; UPDATE stages SET stage_completed = 2 WHERE user_id = $DBID"
 }
 function keypause () {
 

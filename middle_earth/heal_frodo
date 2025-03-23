@@ -3,7 +3,7 @@
 clear
 DBID=$(( `id -u` + 1000))
 RIVENDEL_PORT=$(( $DBID + 20000))
-STAGE=`mariadb -uroot -proot middle_earth -sN -B -e "SELECT stage_completed + 1 FROM stages WHERE user_id = $DBID"`
+STAGE=`sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; SELECT stage_completed + 1 FROM stages WHERE user_id = $DBID;"`
 
 if [ "$STAGE" -gt "5" ] 
 then
@@ -61,7 +61,7 @@ IFS=$OIFS
 
 if [ $HEALER -eq 1 -a $HEALED -eq 1 -a $PLACE -eq 1 ]
 then
-    mariadb -uroot -proot middle_earth -sN -B -e "UPDATE stages SET stage_completed = 5 WHERE user_id = $DBID"
+    sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; UPDATE stages SET stage_completed = 5 WHERE user_id = $DBID;"
     echo "Great Job!"
     echo ""
     echo "By curing Frodo you finished your last mission"
