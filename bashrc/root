@@ -14,7 +14,7 @@ if [ "$COLUMNS" -lt 150 ]; then
 fi
 images=("nazgul" "prancing_pony" "hide_hobbits")
 containers=("nazgul0" "nazgul1" "nazgul2" "nazgul3" "nazgul4" "nazgul6" "nazgul7" "nazgul5" "prancing_pony")
-services=("mariadb" "process_users")
+services=("sshd" "process_users")
 bar_length=50
 total_images=${#images[@]}  
 total_containers=${#containers[@]} 
@@ -63,7 +63,7 @@ for ((i=0; i<$total_services; i++)); do
   while ! supervisorctl status|grep "process_users"|grep "RUNNING" > /dev/null 2>&1; do
     sleep 1
   done
-  while ! supervisorctl status|grep "mariadb"|grep "RUNNING" > /dev/null 2>&1; do
+  while ! supervisorctl status|grep "sshd"|grep "RUNNING" > /dev/null 2>&1; do
     sleep 1
   done
   progress=$(( ((i + 1) * 100) / total_services))
@@ -111,6 +111,7 @@ echo ""
 echo ""
 echo "Everything is ready for starting..."
 read -n 1 -r -s -p "Press any key to continue..." key
+echo ""
 clear
 su - hobbiton
 exit

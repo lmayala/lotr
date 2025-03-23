@@ -23,4 +23,4 @@ done
 
 cd /pony
 docker build . -t prancing_pony
-docker run -d -v /home:/home -v /etc/shadow:/etc/shadow -v /etc/passwd:/etc/passwd -v /etc/group:/etc/group -h the-prancing-pony --name prancing_pony prancing_pony
+docker run -d -v /usr/local/lib/middle_earth:/usr/local/lib/middle_earth -v /home:/home -v /etc/shadow:/etc/shadow -v /etc/passwd:/etc/passwd -v /etc/group:/etc/group -h the-prancing-pony --name prancing_pony prancing_pony

@@ -17,7 +17,7 @@ then
 fi
 
 DBID=$(( `id -u` + 1000))
-STAGE=`mariadb -uroot -proot middle_earth -sN -B -e "SELECT stage_completed FROM stages WHERE user_id = $DBID"`
+STAGE=`sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; SELECT stage_completed FROM stages WHERE user_id = $DBID;"`
 if [ "$STAGE" != 0 ]
 then
 	echo "-------------------------------------------------------------------------"
@@ -86,7 +86,7 @@ echo "All riders were identified"
 echo "-----------------------------"
 echo ""
 echo ""
-STAGE=`mariadb -uroot -proot middle_earth -e "UPDATE stages SET stage_completed = 1 WHERE user_id = $DBID"`
+STAGE=`sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; UPDATE stages SET stage_completed = 1 WHERE user_id = $DBID;"`
 read -n 1 -r -s -p "Press any key to continue..." key
 echo ""
 clear

@@ -1,6 +1,6 @@
 FROM alpine
 
-RUN apk add --no-cache bash openssh mysql-client
+RUN apk add --no-cache bash openssh mysql-client sqlite3
 COPY load_bash.sh /etc/profile.d/
 COPY middle_earth/ /usr/local/bin/middle_earth
 COPY gandalf_letter.txt /opt

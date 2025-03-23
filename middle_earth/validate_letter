@@ -3,8 +3,7 @@
 LETTER="$HOME/gandalf_letter.txt"
 DBID=$(( `id -u` + 1000))
 ORIG_LETTER=/opt/gandalf_letter
-STAGE_COMPLETED=`mariadb -uroot -proot middle_earth -sN -B -e "SELECT stage_completed FROM stages WHERE user_id = $DBID"`
-STAGE=$(( $STAGE_COMPLETED + 1 ))
+STAGE=`sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; SELECT stage_completed + 1 FROM stages WHERE user_id = $DBID;"`
 
 if [ "$STAGE" != "3" ] 
 then
@@ -37,7 +36,7 @@ then
     if [ "$CMP" != 0 ]
 
     then    
-        mariadb -uroot -proot middle_earth -sN -B -e "UPDATE stages SET stage_completed = 3 WHERE user_id = $DBID"
+        sqlite3 /usr/local/lib/middle_earth/middle_earth.db "PRAGMA foreign_keys = ON; UPDATE stages SET stage_completed = 3 WHERE user_id = $DBID"
         echo "Great Job!"
 	echo "You were able to take Gandalf's letter out of the Prancing Pony"
         echo ""

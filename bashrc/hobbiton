@@ -64,8 +64,11 @@ while true; do
         echo "**            ssh <your_username>@${IP}             **"
         echo "**                                                        **"
         echo "************************************************************"
+        echo ""
     fi
     read -n 1 -r -s -p "Press any key to continue..." key
+    echo ""
+    echo ""
     break
 done
 
