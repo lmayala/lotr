@@ -98,7 +98,6 @@ echo "Checking containers are running"
 echo ""
 for ((i=0; i<$total_containers; i++)); do
   while ! docker ps --format "{{.Names}}" | grep -q "${containers[$i]}"; do
-
     sleep 1
   done
   progress=$(( ((i + 1) * 100) / total_containers ))
