@@ -7,7 +7,7 @@ FRODOPORT=$(( $DBID + 3))
 MERRYPORT=$(( $DBID + 4))
 DANGER=0
 
-STAGE_COMPLETED=`mariadb -uroot -proot middle_earth -sN -B -e "SELECT stage_completed FROM stages WHERE user_id = $DBID"`
+STAGE_COMPLETED=`sqlite3 -separator " " /var/lib/middle_earth/middle_earth.db "SELECT stage_completed FROM stages WHERE user_id = $DBID"`
 STAGE=$(( $STAGE_COMPLETED + 1 ))
 
 clear
@@ -46,7 +46,7 @@ fi
 
 if [ $DANGER -eq 0 ]
 then
-    mariadb -uroot -proot middle_earth -sN -B -e "UPDATE stages SET stage_completed = 4 WHERE user_id = $DBID"
+    sqlite3 /var/lib/middle_earth/middle_earth.db "UPDATE stages SET stage_completed = 4 WHERE user_id = $DBID"
     echo "Congratulations!!!"
     echo ""
     echo "You helped the fellowship to hide from the black riders."

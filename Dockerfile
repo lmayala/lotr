@@ -25,10 +25,10 @@ FROM docker
 
 # Packages required by game
 RUN echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories 
-RUN apk update && apk add --no-cache supervisor bash mariadb libcaca-dev sudo mariadb-client ncurses curl vim openssh
+RUN apk update && apk add --no-cache supervisor bash libcaca-dev sudo sqlite-dev ncurses curl vim openssh sqlite
 #slang-dev should be added if jed needs it
 
-# Configure supervisor for running mysql and process_users as services
+# Configure supervisor for running process_users as services
 COPY configurations/supervisord.conf /etc/supervisord.conf
 RUN adduser hobbiton -D -h /home/hobbiton -s /bin/bash
 
@@ -48,13 +48,11 @@ RUN chmod +x /usr/local/bin/startup.sh
 COPY middle_earth/ /usr/local/bin/middle_earth
 ENV PATH="/usr/local/bin/middle_earth:$PATH"
 
-RUN mariadb-install-db --user=mysql --basedir=/usr --datadir=/var/lib/mysql
-COPY configurations/mariadb-server.cnf /etc/my.cnf.d/
-RUN mkdir -p /run/mysql
-RUN chown mysql:mysql /run/mysql
+# Create directory for SQLite database
+RUN mkdir -p /var/lib/middle_earth
 
 #Archivo necesario para la creación de la base de datos
-COPY db/middle_earth.sql /root
+COPY db/middle_earth_sqlite.sql /root
 COPY scripts/config.sh /root
 RUN chmod 755 /root/config.sh
 

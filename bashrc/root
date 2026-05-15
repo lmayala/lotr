@@ -14,7 +14,7 @@ if [ "$COLUMNS" -lt 150 ]; then
 fi
 images=("nazgul" "prancing_pony" "hide_hobbits")
 containers=("nazgul0" "nazgul1" "nazgul2" "nazgul3" "nazgul4" "nazgul6" "nazgul7" "nazgul5" "prancing_pony")
-services=("mariadb" "process_users")
+services=("process_users")
 bar_length=50
 total_images=${#images[@]}  
 total_containers=${#containers[@]} 
@@ -61,9 +61,6 @@ echo "Checking required services are running"
 echo ""
 for ((i=0; i<$total_services; i++)); do
   while ! supervisorctl status|grep "process_users"|grep "RUNNING" > /dev/null 2>&1; do
-    sleep 1
-  done
-  while ! supervisorctl status|grep "mariadb"|grep "RUNNING" > /dev/null 2>&1; do
     sleep 1
   done
   progress=$(( ((i + 1) * 100) / total_services))

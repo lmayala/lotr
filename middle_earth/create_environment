@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Wait for Docker daemon to be ready
+while ! docker info >/dev/null 2>&1; do
+    echo "Waiting for Docker daemon to be ready..."
+    sleep 2
+done
+
 SRC=/usr/local/bin/middle_earth
 DATA=$SRC/data
 
@@ -8,6 +14,8 @@ DATA=$SRC/data
 ###########################
 
 nazguls_array=('The Witch-king'  'Khamûl' 'Dark Marshal' 'Betrayer' 'Undying' 'Dwimmerleik' 'Knight of Umbar' 'Tainted' 'Shadow Lord')
+
+
 
 for i in "${!nazguls_array[@]}"; do
     docker start nazgul$i >> /dev/null
@@ -23,4 +31,4 @@ done
 
 cd /pony
 docker build . -t prancing_pony
-docker run -d -v /home:/home -v /etc/shadow:/etc/shadow -v /etc/passwd:/etc/passwd -v /etc/group:/etc/group -h the-prancing-pony --name prancing_pony prancing_pony
+docker run -d -v /home:/home -v /etc/shadow:/etc/shadow -v /etc/passwd:/etc/passwd -v /etc/group:/etc/group -v /var/lib/middle_earth:/var/lib/middle_earth -h the-prancing-pony --name prancing_pony prancing_pony
