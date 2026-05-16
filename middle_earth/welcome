@@ -56,11 +56,17 @@ helpme
 keypause
 if [ "$STAGE" == "6" ]
 then
-    PROCESS=$(pgrep -u $USER sshd | head -1)
-    if [ "$PROCESS" != "" ]
-    then
-        kill -9 $(pgrep -u $USER sshd | head -1)
-    fi
+    echo ""
+    echo "*****************************************************************"
+    echo "*  Farewell, $name! Your journey in the Shire has come to an end.  *"
+    echo "*  Frodo has been healed by Elrond, and the Fellowship         *"
+    echo "*  continues its quest. Your part in the story of the Ring       *"
+    echo "*  has concluded for now, but the adventure in Middle-earth      *"
+    echo "*  is never truly over.                                        *"
+    echo "*                                                                *"
+    echo "*  May the blessings of Rivendell guide your path.                *"
+    echo "*  Like Frodo, you have played your part in this tale.          *"
+    echo "*****************************************************************"
     kill -9 $PPID
 fi
 echo ""

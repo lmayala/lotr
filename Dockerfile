@@ -31,6 +31,7 @@ RUN apk update && apk add --no-cache supervisor bash libcaca-dev sudo sqlite-dev
 # Configure supervisor for running process_users as services
 COPY configurations/supervisord.conf /etc/supervisord.conf
 RUN adduser hobbiton -D -h /home/hobbiton -s /bin/bash
+RUN addgroup hobbiton docker
 
 
 # toilet is a required package for some of the console 'graphics' outputs

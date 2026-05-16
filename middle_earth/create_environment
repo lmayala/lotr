@@ -30,4 +30,4 @@ done
 
 cd /pony
 docker build . -t prancing_pony || { echo "Failed to build prancing_pony"; exit 1; }
-docker run -d -v /home:/home -v /etc/shadow:/etc/shadow -v /etc/passwd:/etc/passwd -v /etc/group:/etc/group -v /var/lib/middle_earth:/var/lib/middle_earth -h the-prancing-pony --name prancing_pony prancing_pony || { echo "Failed to run prancing_pony"; exit 1; }
+docker run -d -v /home:/home -v /var/lib/middle_earth:/var/lib/middle_earth -h the-prancing-pony --name prancing_pony prancing_pony || { echo "Failed to run prancing_pony"; exit 1; }

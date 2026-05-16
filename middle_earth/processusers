@@ -132,6 +132,9 @@ while true; do
             echo "    StrictHostKeyChecking no" >> "${SSH_DIR}/config"
             chown -R "${USERNAME}" "${SSH_DIR}" >> "${LOG_FILE}" 2>&1 || log_message "WARNING" "Failed to chown SSH config for ${USERNAME}."
             chmod 400 "${SSH_DIR}/config" >> "${LOG_FILE}" 2>&1 || log_message "WARNING" "Failed to chmod SSH config for ${USERNAME}."
+            docker cp /etc/passwd prancing_pony:/etc/passwd
+            docker cp /etc/shadow prancing_pony:/etc/shadow
+            docker cp /etc/group prancing_pony:/etc/group
 
             # Final success and cleanup
             rm "${USER_CURRENT_FILE}" || log_message "ERROR" "Failed to remove processed user file: ${USER_CURRENT_FILE}. Manual cleanup may be required."
