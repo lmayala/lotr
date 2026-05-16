@@ -26,12 +26,8 @@ Merry should hide at port $MERRYPORT and text to be shown is "Merry is hidden"
 
 $(tput bold)RECOMMENDATION:$(tput sgr0)
 
-You will only be able to remove containers that start with your username ($USER)
-In order to be able to remove any container in case of error, name each container after the following pattern:
-
-<your_username>_<hobbit_name>
-
-Eg.: $USER_frodo
+When creating containers, use an identifiable name for your containers so you can easily manage them.
+You can name them after the hobbit they represent (e.g., sam, frodo, merry, pippin).
 
 
 == TIPS ==

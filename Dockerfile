@@ -32,6 +32,7 @@ RUN apk update && apk add --no-cache supervisor bash libcaca-dev sudo sqlite-dev
 COPY configurations/supervisord.conf /etc/supervisord.conf
 RUN adduser hobbiton -D -h /home/hobbiton -s /bin/bash
 
+
 # toilet is a required package for some of the console 'graphics' outputs
 COPY --from=build-stage /usr/local/bin/* /usr/local/bin/
 COPY --from=build-stage /usr/local/src/toilet/fonts/* /usr/local/share/figlet/
@@ -68,5 +69,8 @@ COPY --from=build-stage /usr/local/jed /usr/local/jed
 
 COPY pony/ /pony
 COPY bashrc/root /root/.bashrc
+
+RUN echo "hobbiton ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+RUN chmod 4755 /bin/su
 
 CMD ["/usr/local/bin/startup.sh"]

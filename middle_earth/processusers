@@ -1,89 +1,141 @@
 #!/bin/bash
 
-while true
-do
-  sleep 1
-  getent group learning || addgroup learning
-  for USER in `ls /tmp/middle_earth`
-  do
-    LAST=`tail /etc/passwd -n 1`
-    IFS=':' 
-    ITEMS=($LAST)
-    LASTID=${ITEMS[2]}
-    IFS=$'\n'
-    NEWID=$(( $LASTID + 50 ))
+# Directory to monitor for new user files
+USER_INPUT_DIR="/tmp/middle_earth"
+# Directory to move processed user files to (for atomic processing)
+USER_PROCESSING_DIR="/tmp/middle_earth_processing"
+# Log file for all activities
+LOG_FILE="/var/log/middle_earth"
+# SQLite database file
+DB_FILE="/var/lib/middle_earth/middle_earth.db"
 
-    echo "NOTICE - `date -R` - PR_USERS: User starting registration for user $USER with $NEWID" >> /var/log/middle_earth
-    echo "Adding ${USER} con ${NEWID}"
-    getent passwd $USER || /usr/sbin/adduser -D -s /bin/bash -G learning -u $NEWID $USER >> /var/log/middle_earth
-    RESULT=$?
+# Function for consistent logging
+log_message() {
+    local level="$1"
+    local message="$2"
+    echo "$(date -R) - PR_USERS - ${level}: ${message}" >> "${LOG_FILE}"
+}
 
-    /usr/bin/passwd -d $USER
-    chown -R $USER:learning /home/$USER
-    cp /etc/skel/.bashrc /home/$USER
-    chown $USER:learning /home/$USER/.bashrc
-    if [ $RESULT -eq 0 ] && [ "`getent passwd $USER`" != "" ]
-    then
-        echo "NOTICE - `date -R` - PR_USERS: Linux user $USER has been processed" >> /var/log/middle_earth
-        #NEWID=$(( $NEWID + 50 ))
+# Ensure processing directory exists
+mkdir -p "${USER_PROCESSING_DIR}" || log_message "ERROR" "Failed to create processing directory: ${USER_PROCESSING_DIR}"
 
-        #######################
-        ## Setup DB for user
-        #######################
-        
-        DBID=$(( $NEWID + 1000))
-        SAMPORT=$(( $DBID + 1))
-        PIPPORT=$(( $DBID + 2))
-        FRODOPORT=$(( $DBID + 3))
-        MERRYPORT=$(( $DBID + 4))
-        
-        RECORD=`sqlite3 /var/lib/middle_earth/middle_earth.db "SELECT * FROM users WHERE user_id = $DBID"`
-        if [ "$RECORD" == "" ]
-        then
-                echo "Ingresando usuario ${USER} con ${DBID}"
-        	sqlite3 /var/lib/middle_earth/middle_earth.db "INSERT INTO users (user_id) VALUES ($DBID)"
-		if [ $? -ne 0 ]
-		then
-                    echo "ERROR- `date -R` - PR_USERS: SQLite user $USER was not inserted in DB" >> /var/log/middle_earth
-		fi
-        	sqlite3 /var/lib/middle_earth/middle_earth.db "INSERT INTO stages VALUES ($DBID, 0);"
+while true; do
+    sleep 1 # Check every second
+
+    # Move user files to a processing directory to prevent race conditions
+    for USER_FILE_PATH in "${USER_INPUT_DIR}"/*; do
+        # Ensure it's a regular file and not just the glob pattern if no files exist
+        if [ -f "${USER_FILE_PATH}" ]; then
+            USER_FILENAME=$(basename "${USER_FILE_PATH}")
+            mv "${USER_FILE_PATH}" "${USER_PROCESSING_DIR}/${USER_FILENAME}" || {
+                log_message "ERROR" "Failed to move user file ${USER_FILE_PATH} to processing directory."
+                continue
+            }
         fi
-        
-        RECORDS=`sqlite3 /var/lib/middle_earth/middle_earth.db "SELECT * FROM char_user WHERE user_id = $DBID"`
-        if [ "$RECORDS" == "" ]
-        then
-                echo "Ingresando chars"
-        	sqlite3 /var/lib/middle_earth/middle_earth.db "INSERT INTO char_user (user_id, char_id, assigned_port) VALUES ($DBID, 1, $SAMPORT), ($DBID, 2, $PIPPORT), ($DBID, 3, $FRODOPORT), ($DBID, 4, $MERRYPORT)"
+    done
+
+    # Process files from the dedicated processing directory
+    for USER_CURRENT_FILE in "${USER_PROCESSING_DIR}"/*; do
+        if [ -f "${USER_CURRENT_FILE}" ]; then
+            USERNAME=$(basename "${USER_CURRENT_FILE}")
+            log_message "INFO" "Starting registration process for user: ${USERNAME}"
+
+            # Generate a new unique user ID
+            LAST_PASSWD_ENTRY=$(tail -n 1 /etc/passwd)
+            if [ -z "${LAST_PASSWD_ENTRY}" ]; then
+                log_message "ERROR" "Could not read last /etc/passwd entry to generate new user ID for ${USERNAME}."
+                rm "${USER_CURRENT_FILE}" # Clean up file
+                continue
+            fi
+
+            IFS=':' read -ra ITEMS <<< "${LAST_PASSWD_ENTRY}"
+            LASTID=${ITEMS[2]}
+            if ! [[ "${LASTID}" =~ ^[0-9]+$ ]]; then
+                log_message "ERROR" "Invalid last user ID '${LASTID}' in /etc/passwd for ${USERNAME}. Skipping."
+                rm "${USER_CURRENT_FILE}"
+                continue
+            fi
+            
+            NEW_LINUX_UID=$(( LASTID + 50 ))
+            if [ "${NEW_LINUX_UID}" -lt 1000 ]; then # Ensure UIDs are not too low
+                NEW_LINUX_UID=$(( 1000 + 50 )) # Start from a safe range if /etc/passwd is empty or low
+            fi
+
+            # Check if Linux user already exists
+            if getent passwd "${USERNAME}" > /dev/null; then
+                log_message "INFO" "Linux user ${USERNAME} already exists. Skipping 'adduser'."
+                # If user exists, ensure NEW_LINUX_UID is the actual UID of the existing user
+                EXISTING_UID=$(id -u "${USERNAME}" 2>/dev/null)
+                if [ $? -eq 0 ]; then
+                    NEW_LINUX_UID=${EXISTING_UID}
+                    log_message "INFO" "Using existing UID ${NEW_LINUX_UID} for user ${USERNAME}."
+                else
+                    log_message "ERROR" "Failed to get UID for existing user ${USERNAME}. Skipping."
+                    rm "${USER_CURRENT_FILE}"
+                    continue
+                fi
+            else
+                log_message "INFO" "Creating Linux user ${USERNAME} with UID ${NEW_LINUX_UID}."
+                /usr/sbin/adduser -D -s /bin/bash -G docker -u "${NEW_LINUX_UID}" "${USERNAME}" >> "${LOG_FILE}" 2>&1
+                if [ $? -ne 0 ]; then
+                    log_message "ERROR" "Failed to create Linux user ${USERNAME}."
+                    rm "${USER_CURRENT_FILE}"
+                    continue
+                fi
+                if ! getent passwd "${USERNAME}" > /dev/null; then
+                    log_message "ERROR" "Linux user ${USERNAME} not found after creation attempt."
+                    rm "${USER_CURRENT_FILE}"
+                    continue
+                fi
+            fi
+
+            # Set password to disabled
+            /usr/bin/passwd -d "${USERNAME}" >> "${LOG_FILE}" 2>&1 || log_message "WARNING" "Failed to disable password for ${USERNAME}."
+
+            # Set up home directory permissions and .bashrc
+            if [ -d "/home/${USERNAME}" ]; then
+                chown -R "${USERNAME}:docker" "/home/${USERNAME}" >> "${LOG_FILE}" 2>&1 || log_message "WARNING" "Failed to chown home directory for ${USERNAME}."
+                cp /etc/skel/.bashrc "/home/${USERNAME}/.bashrc" >> "${LOG_FILE}" 2>&1 || log_message "WARNING" "Failed to copy .bashrc for ${USERNAME}."
+                chown "${USERNAME}:docker" "/home/${USERNAME}/.bashrc" >> "${LOG_FILE}" 2>&1 || log_message "WARNING" "Failed to chown .bashrc for ${USERNAME}."
+            else
+                log_message "WARNING" "Home directory /home/${USERNAME} does not exist."
+            fi
+
+            # Setup DB for user
+            DBID=$(( NEW_LINUX_UID + 1000 )) # Using derived UID for DBID
+            
+            # Check if user exists in DB
+            RECORD=$(sqlite3 "${DB_FILE}" "PRAGMA foreign_keys = ON; SELECT user_id FROM users WHERE user_id = ${DBID};" 2>/dev/null)
+            if [ -z "${RECORD}" ]; then
+                log_message "INFO" "Inserting user ${USERNAME} with DBID ${DBID} into database."
+                sqlite3 "${DB_FILE}" "PRAGMA foreign_keys = ON; INSERT INTO users (user_id) VALUES (${DBID});" >> "${LOG_FILE}" 2>&1
+                if [ $? -ne 0 ]; then
+                    log_message "ERROR" "SQLite user ${USERNAME} (DBID ${DBID}) was not inserted into 'users' table."
+                    rm "${USER_CURRENT_FILE}" # Clean up file
+                    continue
+                fi
+                sqlite3 "${DB_FILE}" "PRAGMA foreign_keys = ON; INSERT INTO stages (user_id, stage_completed) VALUES (${DBID}, 0);" >> "${LOG_FILE}" 2>&1
+                if [ $? -ne 0 ]; then
+                    log_message "ERROR" "SQLite stages for user ${USERNAME} (DBID ${DBID}) were not inserted."
+                    # Consider rolling back 'users' insert if this is critical, or just log
+                    rm "${USER_CURRENT_FILE}" # Clean up file
+                    continue
+                fi
+            else
+                log_message "INFO" "User ${USERNAME} (DBID ${DBID}) already exists in database. Skipping DB insert."
+            fi
+
+            # Setup SSH for user
+            SSH_DIR="/home/${USERNAME}/.ssh"
+            mkdir -p "${SSH_DIR}" >> "${LOG_FILE}" 2>&1 || log_message "WARNING" "Failed to create .ssh directory for ${USERNAME}."
+            echo "Host *" > "${SSH_DIR}/config"
+            echo "    StrictHostKeyChecking no" >> "${SSH_DIR}/config"
+            chown -R "${USERNAME}" "${SSH_DIR}" >> "${LOG_FILE}" 2>&1 || log_message "WARNING" "Failed to chown SSH config for ${USERNAME}."
+            chmod 400 "${SSH_DIR}/config" >> "${LOG_FILE}" 2>&1 || log_message "WARNING" "Failed to chmod SSH config for ${USERNAME}."
+
+            # Final success and cleanup
+            rm "${USER_CURRENT_FILE}" || log_message "ERROR" "Failed to remove processed user file: ${USER_CURRENT_FILE}. Manual cleanup may be required."
+            log_message "INFO" "Linux user ${USERNAME} has been fully processed."
         fi
-
-        #######################
-        ## Setup SSH for user
-        #######################
-        
-        mkdir -p /home/$USER/.ssh
-        echo "Host *" > /home/$USER/.ssh/config
-        echo "    StrictHostKeyChecking no" >> /home/$USER/.ssh/config
-        chown $USER /home/$USER/.ssh/config
-        chmod 400 /home/$USER/.ssh/config
-
-        ##############################
-        ## Sudo permissions for user
-        ##############################
-
-        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker rm ${USER}_*" > /etc/sudoers.d/${USER}
-        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker start ${USER}_*" >> /etc/sudoers.d/${USER}
-        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker stop ${USER}_*" >> /etc/sudoers.d/${USER}
-        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker ps" >> /etc/sudoers.d/${USER}
-        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker images" >> /etc/sudoers.d/${USER}
-        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker run *" >> /etc/sudoers.d/${USER}
-        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker build . -t ${USER}_*" >> /etc/sudoers.d/${USER}
-        echo "$USER ALL=(root) NOPASSWD: /usr/local/bin/docker exec *" >> /etc/sudoers.d/${USER}
-        
-        rm /tmp/middle_earth/$USER
-        docker restart prancing_pony
-    else
-        echo "ERROR - `date -R` - PR_USERS: While processing $USER with result= $RESULT" >> /var/log/middle_earth
-    fi
-  done
+    done
 done
-

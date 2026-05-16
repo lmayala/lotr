@@ -3,7 +3,26 @@ trap '' 2
 SRC=/usr/local/bin/middle_earth
 DATA=$SRC/data
 DBID=$(( `id -u` + 1000))
-STAGE=`sqlite3 -separator " " /var/lib/middle_earth/middle_earth.db "SELECT stage_completed + 1 FROM stages WHERE user_id = $DBID"`
+STAGE=""
+
+# Retry mechanism for database read
+for i in $(seq 1 10); do
+    STAGE=`sqlite3 -separator " " /var/lib/middle_earth/middle_earth.db "SELECT stage_completed + 1 FROM stages WHERE user_id = $DBID" 2>/dev/null`
+    
+    # Check if we got a result
+    if [ -n "$STAGE" ] && [ "$STAGE" != "NULL" ]; then
+        break
+    fi
+    
+    # Wait a bit before retrying
+    sleep 1
+done
+
+# If after 10 retries we still don't have a value, exit with error
+if [ -z "$STAGE" ] || [ "$STAGE" = "NULL" ] || [ "$STAGE" = "" ]; then
+    echo "ERROR: Database not ready after 10 retries. Game may be broken." >&2
+    exit 1
+fi
 
 function keypause () {
 

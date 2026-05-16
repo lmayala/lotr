@@ -58,14 +58,12 @@ case $STAGE in
                 ;;
 	6) 
 		
-		showlines $DATA/sauron_eye.ansi EVAL=false DELAY=0.03
-		keypause
 		clear
 		echo "${BOLD}WELL DONE!! ${NORMAL}"
 		showlines $DATA/help_6.txt 
 		keypause
 		clear
-		showlines $DATA/ring.ansi EVAL=false DELAY=0.03
+		showlines $DATA/sauron_eye.ansi EVAL=false DELAY=0.03
                 ;;
 	*)
 		clear

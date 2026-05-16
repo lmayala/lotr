@@ -2,23 +2,33 @@
 
 FILE=$1
 shift 1
+
 for VAR in "$@"; do
     export "$VAR"
 done
 
-if [ "$DELAY" == "" ]
-then
+if [ -z "$DELAY" ]; then
     DELAY=0.1
 fi
 
+exec 3< "$FILE"
+
+trap '' INT TERM
+
 echo ""
-while IFS= read -r CMD; do
-    if [ "$EVAL" == "true" ]
-    then
+stty -icanon -echo
+
+while IFS= read -r CMD <&3; do
+    if [ "$EVAL" = "true" ]; then
         eval "echo \"$CMD\""
     else
-        echo $CMD
+        echo "$CMD"
     fi
-    sleep "$DELAY"
-done < "$FILE"
 
+    sleep "$DELAY"
+done
+while read -r -t 0 _; do read -r _ ; done  # drena el buffer
+stty sane
+
+trap - INT TERM
+exec 3<&-

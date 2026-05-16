@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Wait for Docker daemon to be ready
 while ! docker info >/dev/null 2>&1; do
@@ -18,10 +19,8 @@ nazguls_array=('The Witch-king'  'Khamûl' 'Dark Marshal' 'Betrayer' 'Undying' '
 
 
 for i in "${!nazguls_array[@]}"; do
-    docker start nazgul$i >> /dev/null
-    if [ $? -eq 1 ]
-    then
-        docker run --name nazgul$i -d --restart always -p 600$i:5678 nazgul -text="${nazguls_array[i]}" 
+    if ! docker start nazgul$i >> /dev/null; then
+        docker run --name nazgul$i -d --restart always -p 600$i:5678 nazgul -text="${nazguls_array[i]}" || { echo "Failed to start or create nazgul$i"; exit 1; }
     fi
 done
 
@@ -30,5 +29,5 @@ done
 ###########################
 
 cd /pony
-docker build . -t prancing_pony
-docker run -d -v /home:/home -v /etc/shadow:/etc/shadow -v /etc/passwd:/etc/passwd -v /etc/group:/etc/group -v /var/lib/middle_earth:/var/lib/middle_earth -h the-prancing-pony --name prancing_pony prancing_pony
+docker build . -t prancing_pony || { echo "Failed to build prancing_pony"; exit 1; }
+docker run -d -v /home:/home -v /etc/shadow:/etc/shadow -v /etc/passwd:/etc/passwd -v /etc/group:/etc/group -v /var/lib/middle_earth:/var/lib/middle_earth -h the-prancing-pony --name prancing_pony prancing_pony || { echo "Failed to run prancing_pony"; exit 1; }

@@ -17,18 +17,7 @@ Docker commands and tips you may need for this step:
   For reaching the content of each container you should use a web URL of the form http://localhost:600x
 
 
-=== WARNING ===
 
-Due to the way docker is installed, all commands must be preceeded by 'sudo'
-So, whenever this help says 'docker ps' you should execute 'sudo docker ps'
-
-
-=== WARNING2 ===
-
-When playing you're not allowed to run destructive docker commands (even with 'sudo') on containers whose names do not start with your username
-If you username is 'test', you'll be able to run 'sudo docker rm test_mycontainer' but not 'sudo docker rm otheruser_containers'
-
-It would be a good practice to add your username before any image or container you create so you'll be able to manage it
 
 
 === GOAL ===
