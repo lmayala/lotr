@@ -70,3 +70,9 @@ Finally they should continue their path to Rivendel.
 Each of the stages will present new challenges that need to be completed before advancing to next stage.
 
 <img src="images/gandalf.png" width="250"/>
+
+## A Note from the Lore-Master
+
+This journey is a labor of love—a non-commercial fan project created solely for the purpose of learning Docker. This project is not affiliated with or endorsed by the Tolkien Estate or the movie studios. We are simply travelers in Middle-earth using the Ring's magic to teach containerization. Please support the official works of J.R.R. Tolkien!
+
+
