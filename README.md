@@ -1,4 +1,4 @@
-# DOCKER GAME - LOTR
+# DOCKER GAME 
 
 Could learning Docker have some kind of fun?
 
@@ -19,30 +19,30 @@ Required commands are similar to these...
 
 For cloning the repo:
 ```
-git clone git@github.com:lmayala/lotr.git
+git clone git@github.com:lmayala/ring-quest.git
 ```
 
-Bulding the image, assuming you'll name it 'lotr':
+Bulding the image, assuming you'll name it 'quest':
 
 ```
-docker build . -t lotr
+docker build . -t quest
 ```
 
 Running it (assuming you'll create the container with the same name as the image):
 ```
-docker run -d --name lotr --privileged lotr
+docker run -d --name quest --privileged quest
 ```
 Be aware that the flag **--privileged** is required for the container to run Docker properly inside of it
 
 Accessing the container
 ```
-docker exec -it lotr /bin/bash
+docker exec -it quest /bin/bash
 ```
 
 ## Requirements
 
 The game has been tested under Linux and Windows and works fine in any environment.
-Image takes around 1Gb for running a container with several containers inside
+Image takes around 650Mb for running a container with several containers inside
 For visualization, you may need a console screen with a minimum of 150 columns
 
 
