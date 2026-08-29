@@ -1,78 +1,81 @@
-# DOCKER GAME 
+# Ring Quest
 
-Could learning Docker have some kind of fun?
+**Learn Docker the Middle-earth way.**
 
-This is an attempt of answering 'yes' to that question.
+Could learning Docker be fun?  
+This project answers that question with a yes.
 
-You'll find here a version of a DIND (Docker in Docker) image that will allow to create a container running a console game for learning Docker
+Ring Quest is an interactive, console-based adventure that teaches the fundamentals of Docker through the early journey of Frodo and the Fellowship — from the Shire to Rivendell.
 
-## How to run it
+You will run a Docker-in-Docker environment and complete practical challenges while the story unfolds around you.
 
-The instructions for running the game are pretty simple
+---
 
-1. Clone the repository
-1. Build the image
-1. Run it
-1. Access it
+## What You Will Learn
 
-Required commands are similar to these...
+- Difference between images and containers
+- Listing and inspecting containers
+- Accessing containers with `docker exec`
+- Running containers from existing images
+- Writing basic Dockerfiles and building images
 
-For cloning the repo:
-```
-git clone git@github.com:lmayala/ring-quest.git
-```
-
-Bulding the image, assuming you'll name it 'quest':
-
-```
-docker build . -t quest
-```
-
-Running it (assuming you'll create the container with the same name as the image):
-```
-docker run -d --name quest --privileged quest
-```
-Be aware that the flag **--privileged** is required for the container to run Docker properly inside of it
-
-Accessing the container
-```
-docker exec -it quest /bin/bash
-```
+---
 
 ## Requirements
 
-The game has been tested under Linux and Windows and works fine in any environment.
-Image takes around 650Mb for running a container with several containers inside
-For visualization, you may need a console screen with a minimum of 150 columns
+- Docker installed and running
+- A terminal with **at least 150 columns** (important for the visuals)
+- ~650 MB of disk space for the image
+- Works on Linux and Windows (tested)
 
+---
 
-## The game - Docker perspective
+## How to Play
 
-The game focus on the early steps when learning Docker. Ideally it should be complemented with some documentation mainly focusing on learning about images, containers, their differences and basic commands.
-The goes through some stages including:
+```bash
+# 1. Clone the repository
+git clone https://github.com/lmayala/ring-quest.git
+cd ring-quest
 
-1. Identifying existent containers
-1. Accessing containers through console
-1. Creating containers based on existing images
-1. Creating new images with very basic dockerfiles. 
+# 2. Build the image
+docker build -t ring-quest .
 
+# 3. Run the container (privileged mode is required)
+docker run -d --name ring-quest --privileged ring-quest
 
-## The game - Player perspective
+# 4. Enter the adventure
+docker exec -it ring-quest /bin/bash
+```
 
-<img src="images/prancing_pony.png" width="250"/>
+Once inside, the game will guide you.
 
+---
 
-The environment for the game is the first part of Frodo's travel with The Ring.
-Everything happens between The Shire and Rivendel.
-Frodo and the hobbits will be pursued by the evil Nazgûls and they should reach The Prancing Pony before meeting Aragorn.
-Finally they should continue their path to Rivendel.
+## The Story
 
-Each of the stages will present new challenges that need to be completed before advancing to next stage.
+You follow Frodo and the hobbits as they flee the Shire, pursued by the Nazgûl.  
+Your goal is to reach the Prancing Pony and continue toward Rivendell, solving Docker challenges at each stage.
 
-<img src="images/gandalf.png" width="250"/>
+---
 
-## A Note from the Lore-Master
+## Series
 
-This journey is a labor of love—a non-commercial fan project created solely for the purpose of learning Docker. This project is not affiliated with or endorsed by the Tolkien Estate or the movie studios. We are simply travelers in Middle-earth using the Ring's magic to teach containerization. Please support the official works of J.R.R. Tolkien!
+This is **Part 1** of a learning path:
 
+1. **Ring Quest** → Docker fundamentals  
+2. [Tower Quest](https://github.com/lmayala/tower-quest) → Docker Compose  
+3. *(Coming soon)* Return of the King → Kubernetes
 
+---
+
+## Disclaimer
+
+This is a non-commercial fan project created purely for educational purposes.  
+It is not affiliated with or endorsed by the Tolkien Estate or any film studios.  
+Please support the official works of J.R.R. Tolkien.
+
+---
+
+## Contributing & Feedback
+
+Issues, suggestions, and improvements are welcome!
